@@ -1,0 +1,74 @@
+---
+title: "FML ASSIGNMENT_1 RAJESH"
+output:
+  html_document: default
+  pdf_document: default
+---
+```{r}
+#Started by importing the dataset from an Excel file.
+#I have obtained my dataset from kaggle(Global YouTube Statistics [https://www.kaggle.com/datasets/nelgiriyewithana/global-youtube-statistics-2023]).
+
+library(readxl)
+data1 <- read_excel("C:\\Users\\yadla sreebhavya\\Downloads\\GYS\\GlobalYouTubeStatistics.xlsx")
+
+```
+
+
+
+
+```{r}
+
+# removed rows with missing values (NAs) from the dataset using the na.omit()
+
+data1 <- na.omit(data1)
+
+```
+
+
+```{r summary-quantitative}
+
+#generated summary statistics for the quantitative variables and categorical variables in the dataset.
+
+summary(data1)
+
+```
+
+
+
+
+```{r}
+#Transforming a Numeric Variable (log Transformation)
+
+data1$lowest_yearly_earnings <- log(data1$lowest_yearly_earnings)
+head(data1$lowest_yearly_earnings)
+
+```
+
+```{r}
+#Histogram for "lowest_yearly_earnings"
+
+hist(data1$lowest_yearly_earnings, main = "quantitative variables", xlab = "Lowest earnings", col ='dodgerblue')
+
+```
+
+```{r}
+
+# Histogram for "highest_yearly_earnings" (Similar to Chunk 6)
+
+hist(data1$highest_yearly_earnings, main = "quantitative variables", xlab = "Highest earnings", col ='orchid')
+
+
+```
+
+
+
+
+
+
+```{r}
+
+#Scatterplot for Subscribers vs. Views
+
+plot(data1$subscribers, data1$`video views` ,main = "Scatterplot of Subscribers vs No. of Views", xlab = "subscribers", ylab = "Views", col = "firebrick", pch = 18)
+
+```
