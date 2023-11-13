@@ -1,0 +1,305 @@
+---
+title: "FML_ASSIGNMNET_4"
+author: "RAJESH NALLIBOYINA"
+date: "2023-11-13"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#QUESTION1
+Use only the numerical variables (1 to 9) to cluster the 21 firms. Justify the various choices made in conducting the cluster analysis, such as weights for different variables, the specific clustering algorithm(s) used, the number of clusters formed, and so on. 
+
+#Answer:
+To cluster this dataset effectively, we considered all numeric variables from 1 to 9, encompassing financial factors like profit, market value, price-to-earnings ratio, return on equity, return on assets, leverage, etc. Each variable was assigned equal weight, as they collectively influence a firm's equity.
+
+We employed three clustering algorithms—Kmeans, DBSCAN, and Hierarchical clustering. Kmeans yielded the best results, forming well-defined clusters without outliers. DBSCAN, on the other hand, created two clusters with 15 points and identified six points as outliers, making it unsuitable for this dataset. Hierarchical clustering produced four clusters, but the clusters formed by Kmeans, specifically with five clusters determined by the silhouette method, were superior in terms of point distribution and centroid distances.
+
+Ultimately, we chose Kmeans with five clusters. The clusters and their respective companies are as follows:
+
+1. Cluster 1 (Size: 4): AVE, WPI, MRX, ELN
+2. Cluster 2 (Size: 2): PHA, AGN
+3. Cluster 3 (Size: 4): GSK, PFE, MRK, JNJ
+4. Cluster 4 (Size: 3): IVX, CHTT, BAY
+5. Cluster 5 (Size: 8): WYE, BMY, LLY, AZN, NVS, ABT, SGP, AHM
+
+*************
+
+#QUESTION2
+Interpret the clusters with respect to the numerical variables used in forming the clusters. Is there a pattern in the clusters with respect to the numerical variables (10 to 12)? (those not used in forming the clusters)
+
+#Answer
+
+The clusters formed based on numerical variables are as follows:
+
+Cluster 1, comprising companies AVE, WPI, MRX, ELN, exhibits high revenue growth and beta values but low asset turnover, return on equity, return on assets, and market capitalization. This suggests that these companies are in their early stages of growth, potentially investing heavily in marketing and sales. Despite low profitability, the high revenue growth and beta values indicate an expectation of rapid future earnings improvement, distinguishing these companies by their high growth potential and lower profitability.
+
+Cluster 2, including companies PHA and AGN, displays high price-to-earnings ratios and asset turnover but low net profit margin, return on equity, return on assets, and market capitalization. The high asset turnover and price-to-earnings ratios imply anticipated future earnings improvement, although with minimal past net profit. The high price introduces increased investor risk, characterizing these companies by their higher risk and potential for improved earnings.
+
+Cluster 3, involving companies IVX, CHTT, and BAY, exhibits high market capitalization, return on equity, return on assets, and asset turnover but the lowest beta and profit-to-return ratio. These companies are identified as mature and well-established, with stable stock prices (indicated by low beta) and a lack of efficiency in generating profits. This cluster is distinguished by maturity, stability, and profitability.
+
+Cluster 4, with companies WYE, BMY, LLY, AZN, NVS, ABT, SGP, and AHM, showcases high beta values and leverage but the lowest net profit margin and market capitalization. Additionally, it has relatively low return on equity, return on assets, revenue growth, and profit-to-return ratio. These companies are considered riskier due to their unstable stock prices (high beta) and high leverage, indicating more debts. However, they have the potential for higher returns, especially in a bullish market, highlighting this cluster's distinctiveness in terms of higher risk and return potential.
+
+Cluster 5, encompassing companies GSK, PFE, MRK, and JNJ, demonstrates the highest net profit margin, asset turnover, return on equity, and return on assets, but the lowest beta, profit-to-return ratio, and revenue growth. These companies exhibit high financial performance and low risk, characterized by efficient operations, strong profitability, and stable stock prices. This cluster represents a group of mature, well-established companies with strong financial performance and lower risk profiles.
+
+*************
+
+3.Provide an appropriate name for each cluster using any or all of the variables in the dataset.
+
+*************
+
+## Problem Statement as follows : 
+
+An equities analyst is studying the pharmaceutical industry and would like your help in exploring and understanding the financial data collected by her firm. Her main objective is to understand the structure of the pharmaceutical industry using some basic financial measures. Financial data gathered on 21 firms in the pharmaceutical industry are available in the file Pharmaceuticals.csv Download Pharmaceuticals.csv. For each firm, the following variables are recorded:  
+Market capitalization (in billions of dollars)
+Beta
+Price/earnings ratio
+Return on equity
+Return on assets
+Asset turnover
+Leverage
+Estimated revenue growth
+Net profit margin
+Median recommendation (across major brokerages)
+Location of firm’s headquarters
+Stock exchange on which the firm is listed
+Use cluster analysis to explore and analyze the given dataset as follows: 
+*******
+
+Load the Required Libraries
+```{r}
+library(class)
+library(caret)
+library(e1071)
+library(tidyverse)
+library(ISLR)
+library(factoextra)
+library(dbscan)
+library(cluster) 
+library(klustR)
+library(ggplot2)
+library(dplyr)
+library(gridExtra)
+```
+
+Import the data which was in CSV format
+```{r}
+# import the data
+pharmaceut.data <- read.csv("C:/Users/rajes/Downloads/Pharmaceuticals.csv")
+dim(pharmaceut.data)
+t(t(names(pharmaceut.data)))
+#The 't' function generates a transposed version of the dataframe.
+```
+Dropping the columns that were not required for clustering
+```{r}
+set.seed(159) #It is crucial to guarantee the consistency of our sample by ensuring that we obtain the same set of data when rerunning the code. Eliminate unnecessary columns to streamline the dataset.
+row.names(pharmaceut.data) <- pharmaceut.data[,1]
+cluster.data <- pharmaceut.data[ ,3:11]# 1 and 5 are the indexes for columns ID and ZIP
+dim(cluster.data)
+# Summary of the data
+summary(cluster.data)
+```
+
+# Scaling the data
+```{r}
+# scale the data using scale function
+scaled.data <- scale(cluster.data)
+head(scaled.data)
+
+# distance between each variable
+distance <- get_dist(scaled.data)
+# Visualize the distance 
+fviz_dist(distance)
+```
+
+## Questions
+1.Use only the numerical variables (1 to 9) to cluster the 21 firms. Justify the various choices made in conducting the cluster analysis, such as weights for different variables, the specific clustering algorithm(s) used, the number of clusters formed, and so on. 
+
+# Kmeans Clustering
+For getting the best value of K(no. of clusters) for kmeans
+```{r}
+# sum of squares method
+fviz_nbclust(scaled.data, kmeans, method = "wss") + ggtitle("Elbow method")
+# silhouette method
+fviz_nbclust(scaled.data, kmeans, method = "silhouette") + ggtitle("Silhouette method")
+```
+
+Examining the plot of the Within Sum of Squares (WSS) or elbow method, we observe a curvature or bend at point 2, resembling an elbow. Consequently, the optimal choice for the k value appears to be 2, although the graphical representation is not as distinct due to a lack of sharpness.
+
+```{r}
+# consider k=2
+k <- 2
+set.seed(159)
+# kmeans algorithm
+k_wss <- kmeans(scaled.data, centers = k, nstart=21)
+k_wss
+# To get the centroids of the clusters
+cat("These are the centers of the clusters", "\n")
+k_wss$centers
+
+# Get the size of each cluster
+cat("The Size of the each cluster is", "\n")
+k_wss$size
+
+# To get which point belongs to which cluster
+k_wss$cluster
+
+# Visualization of clusters
+fviz_cluster(k_wss,data = scaled.data) + ggtitle("k=2")
+```
+By employing Kmeans clustering with a k value of 2, the output reveals that one cluster encompasses 11 companies, while the other includes the remaining 10. All numerical variables, representing crucial financial metrics such as market capitalization, net profit, return on assets, and asset turnover, were considered to assess equity. However, it is evident from the clusters that certain data points like AGN, ELN, GSK, etc., are significantly distant from the centroids. This indicates that the chosen number of clusters may not be sufficient.
+*****
+from the plot of silhouette method, we can see that the maximum average silhouette width is at point 5, so we have to consider the k value as 5.
+```{r}
+# consider k=5
+k <- 5
+set.seed(159)
+# kmeans algorithm
+k_sil <- kmeans(scaled.data, centers = k, nstart=20)
+k_sil
+# To get the centroids of the clusters
+cat("These are the centers of the clusters", "\n")
+k_sil$centers
+
+# Get the size of each cluster
+cat("The Size of the each cluster is",  "\n")
+k_sil$size
+
+# To get which point belongs to which cluster
+k_sil$cluster
+
+# Visualization of clusters
+fviz_cluster(k_sil, scaled.data) + ggtitle("k=5")
+```
+Examining the results of Kmeans clustering with a k value of 5, we observe that the first cluster consists of 4 companies, the second has 2 companies, the third has 3 companies, the fourth contains 8 companies, and the remaining companies are part of the fifth cluster. All numerical variables, encompassing financial metrics such as market capitalization, net profit, return on assets, and asset turnover, were taken into consideration to assess equity. Notably, the points are closely located to the centroids in this cluster, suggesting that it may be the most optimal. Let's now explore the characteristics of the remaining clusters.
+
+# DBSCAN Clustering
+To get the best value of radius or eps.
+```{r}
+# Graph to get the best value of radius at min points of 4.
+dbscan::kNNdistplot(cluster.data, k=4)
+```
+
+The KNN-distance plot serves the purpose of identifying the ideal radius for DBSCAN clustering. To determine this radius, it is essential to choose the point on the plot where the curve displays a bend. In the provided plot, the curve exhibits a bend within the distance range of 20 to 40. Consequently, the recommended radius or EPS value is 30, with a minimum point requirement of 4.
+```{r}
+# DBSCAN Algorithm at eps=30 and minpts =4
+dbs <- dbscan::dbscan(cluster.data, eps = 30, minPts = 4)
+
+# Output of the clusters
+print(dbs)
+
+# To get which point belongs to which cluster
+print(dbs$cluster)
+
+# Visualization of clusters
+fviz_cluster(dbs, cluster.data) + ggtitle("DBSCAN Plot")
+```
+
+Analyzing the results and visualizing the DBSCAN clustering with a radius of 30 and a minimum of 4 points, it is evident that two clusters have been established. The first cluster comprises 8 points, the second cluster includes 7 points, and there are six remaining points identified as outliers, as observed from the plot. A desirable cluster typically exhibits a minimal number of outliers. Hence, based on the presence of outliers in this clustering process, it can be concluded that the clustering outcome is not optimal.
+
+# Hierarchical Clustering
+```{r}
+# Get the euclidean distance for the data
+d <- dist(scaled.data, method = "euclidean")
+
+# Hierarchical Clustering
+hc <- hclust(d, method = "complete")
+
+# Visualize the output Dendrogram at height=5
+plot(hc, cex = 0.75, main = "Dendrogram of Hierarchical Clustering")
+rect.hclust(hc, h=5, border = 1:4)
+```
+in hierarchical clustering, we have considered the height h=5. because at h=5 the clusters are formed correspond to the distance between the merged clusters compared to remaining heights. at this height 4 clusters are formed. from the dendrogram we can say that
+first cluster with size 11
+second cluster with size 3
+third cluster with size 1
+fourth cluster with size 6
+but here in this clustering, one cluster have many points and the other have too less, so this might not be a good one to do clustering of all the companies.
+
+```{r}
+heatmap(as.matrix(scaled.data), Colv = NA, hclustfun = hclust, 
+        col=rev(paste("gray",1:99,sep="")))
+```
+
+Out of all these clusters I have found that Kmeans clustering with no.of clusters as 5 produce better clusters.
+**************
+
+2. Interpret the clusters with respect to the numerical variables used in forming the clusters. Is there a pattern in the clusters with respect to the numerical variables (10 to 12)?
+```{r}
+# creating a table with clusters
+clustered.data1 <- pharmaceut.data[,c(2:11)]  %>% 
+                   mutate(cluster=k_sil$cluster) %>% arrange(cluster, ascending = T)
+# dataset with clusters
+clustered.data1
+cat("The following is a compilation of firms along with their respective clusters.")
+clustered.data1[,c(1,11)]
+```
+
+calculate the mean of all numerical variables in each cluster
+```{r}
+# calculate the mean of all numerical variables
+aggregate(scaled.data, by=list(k_sil$cluster), FUN=mean)
+```
+Adding the cluster to normalised data.
+```{r}
+# add the clusters to the scaled data
+scaled.data1 <- data.frame(scaled.data, k_sil$cluster)
+scaled.data1
+```
+Cluster 1, represented by companies AVE, WPI, MRX, ELN, exhibits elevated revenue growth and beta values but lower asset turnover, return on equity, and return on assets. The market capitalization is also relatively modest. These findings suggest that these companies might still be in a growth phase, possibly investing significantly in marketing and sales. Despite lower profitability, the higher revenue growth and beta values imply an anticipation of accelerated earnings improvement in the near future, distinguishing these companies by their greater growth potential and lower profitability.
+
+Cluster 2, comprising companies PHA, AGN, is characterized by high price-to-earnings ratios and asset turnover but lower net profit margin, return on equity, and return on assets. Market capitalization is also relatively low. However, the high asset turnover and price-to-earnings ratios indicate an expectation of future earnings improvement, even with minimal past net profit. Despite the higher price, investors face increased risk.
+
+Cluster 3, with companies IVX, CHTT, BAY, demonstrates high market capitalization, return on equity, return on assets, and asset turnover. However, it has the lowest beta and profit-to-return ratio. These features suggest that these companies are mature and well-established, with stable stock prices (indicated by the low beta) and less efficiency in generating profits. This cluster is distinguished by its maturity, stability, and profitability.
+
+Cluster 4, involving companies WYE, BMY, LLY, AZN, NVS, ABT, SGP, AHM, showcases high beta values and leverage but lower net profit margin and market capitalization. Additionally, it exhibits relatively lower return on equity, return on assets, and revenue growth. Based on these features, it can be concluded that these companies are riskier to invest in compared to others, with unstable stock prices (high beta) and higher leverage indicating more debts. Despite lower profit margins, they have the potential for higher returns, particularly in a bullish market. This cluster is distinguished by its higher risk and potential for greater returns.
+
+Cluster 5, which includes companies GSK, PFE, MRK, JNJ, boasts the highest net profit margin, asset turnover, return on equity, and return on assets. However, it has the lowest beta, profit-to-return ratio, and revenue growth. These features indicate that these companies have strong financial performance and lower risk. The high net profit margins, asset turnovers, and returns on equity and assets imply efficient operations and robust profitability. The lowest beta values and revenue growth suggest stable stock prices and slower revenue growth. This cluster represents a group of mature and well-established companies with robust financial performance and lower risk profiles.
+
+Is there a pattern in the clusters with respect to the numerical variables (10 to12)
+```{r}
+# Add the clusters to the data
+data_pattern <- pharmaceut.data[12:14] %>% mutate(Clusters = k_sil$cluster)
+data_pattern
+
+# Plot the data with Median_Recommendation
+recommendation <- ggplot(data_pattern, mapping = aes(factor(Clusters), fill =Median_Recommendation)) + geom_bar(position='dodge') + labs(x ='Clusters',y = 'Frequency')
+
+# Plot the data with location
+location <- ggplot(data_pattern, mapping = aes(factor(Clusters), fill = Location)) + geom_bar(position = 'dodge') + labs(x='Clusters',y = 'Frequency')
+
+# Plot the data with Exchange
+exchange <- ggplot(data_pattern, mapping = aes(factor(Clusters), fill = Exchange)) + geom_bar(position = 'dodge') + labs(x='Clusters',y = 'Frequency')
+
+grid.arrange(recommendation, location, exchange)
+```
+
+Cluster 1 is advised for a recommendation of Hold and Moderate Buy, situated in North America (US/Canada), and listed on the NYSE.
+
+Cluster 2 is suggested for a Hold & Moderate Sell stance for the majority. It is located in the US, Switzerland, and the UK, and is listed on the NYSE.
+
+Cluster 3 is recommended for a Moderate Buy & Moderate Sell approach. Its locations include France, Ireland, and the US, and it is listed under the NYSE.
+
+Cluster 4 is advised for a Hold & Moderate Buy strategy, with locations in the UK and the US, and listed on the NYSE.
+
+Cluster 5 is recommended for a Hold & Moderate Buy strategy. Its locations span AMEX, Germany, and the US, and it is listed on both NASDAQ and NYSE.
+
+Cluster 1 is suggested for a Moderate Buy and Moderate Sell strategy, with locations in France, Ireland, and the US, and listing under NYSE.
+
+Cluster 2 is recommended for a Hold and Moderate Buy strategy, situated in the US and Canada, and listed on the NYSE.
+
+Cluster 3 is advised for a Hold and Moderate Buy strategy, with locations in the UK and the US, and listed under the NYSE.    
+
+
+
+
+
+
+
+
+
+
